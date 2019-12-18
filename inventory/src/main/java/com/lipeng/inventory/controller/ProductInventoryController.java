@@ -80,6 +80,8 @@ public class ProductInventoryController {
 
                 // 如果读取到了结果，那么就返回
                 if (productInventory != null) {
+                    endTime = System.currentTimeMillis();
+                    waitTime = endTime - startTime;
                     log.info(waitTime + "ms读取到了redis中的库存缓存，商品id="
                             + productInventory.getProductId() + ", 商品库存数量=" + productInventory
                             .getInventoryCnt());
@@ -95,7 +97,7 @@ public class ProductInventoryController {
             }
 
             // 直接尝试从数据库中读取数据
-            log.info("200ms超时,正在从数据库获取数据");
+            log.info("从redis获取库存信息超过200ms,正在从数据库获取数据");
             productInventory = productInventoryService.findProductInventory(productId);
             if (productInventory != null) {
                 // 将缓存刷新一下
