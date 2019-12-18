@@ -99,7 +99,7 @@ public class ProductInventoryController {
             productInventory = productInventoryService.findProductInventory(productId);
             if (productInventory != null) {
                 // 将缓存刷新一下
-                log.info("从数据库获取数据成功:productInventory", productInventory);
+                log.info("从数据库获取数据成功:{}", productInventory);
                 productInventoryService.setProductInventoryCache(productInventory);
                 return productInventory;
             }
