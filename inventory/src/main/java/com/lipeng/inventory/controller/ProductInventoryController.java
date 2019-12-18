@@ -95,9 +95,11 @@ public class ProductInventoryController {
             }
 
             // 直接尝试从数据库中读取数据
+            log.info("200ms超时,正在从数据库获取数据");
             productInventory = productInventoryService.findProductInventory(productId);
             if (productInventory != null) {
                 // 将缓存刷新一下
+                log.info("从数据库获取数据成功:productInventory", productInventory);
                 productInventoryService.setProductInventoryCache(productInventory);
                 return productInventory;
             }
