@@ -12,8 +12,8 @@
         <property name="LOG_PATTERN"
                 value="[%highlight{%p}{green}][%d][%style{%t}{bright,magenta}][%style{%C}{bright,cyan}][%style{%M}{bright,cyan}]:%msg%n%style{%throwable}{red}"/>
         <!-- 定义日志存储的路径，不要配置相对路径 -->
-        <property name="FILE_PATH" value="logs/inventory"/>
-        <property name="FILE_NAME" value="inventory"/>
+        <property name="FILE_PATH" value="logs/cache"/>
+        <property name="FILE_NAME" value="cache"/>
     </Properties>
 
     <appenders>
@@ -99,6 +99,9 @@
         <Logger name="org.springframework" level="info" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
+
+        <logger name="org.apache.kafka" level="off" />
+        <logger name="org.springframework.kafka" level="off" />
 
         <root level="INFO">
             <appender-ref ref="Console"/>
