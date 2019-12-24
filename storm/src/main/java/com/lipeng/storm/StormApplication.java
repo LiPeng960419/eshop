@@ -1,18 +1,12 @@
 package com.lipeng.storm;
 
-import com.lipeng.storm.config.ZKUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 @RestController
 public class StormApplication {
-
-    @Autowired
-    private ZKUtils zkUtils;
 
     public static void main(String[] args) {
         SpringApplication.run(StormApplication.class, args);
@@ -28,25 +22,5 @@ public class StormApplication {
 //        //app.setLogStartupInfo(false);
 //        app.run(args);
 //    }
-
-    @GetMapping("/lock")
-    public void getLock() throws Exception {
-        for (int i = 0; i < 10; i++) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        zkUtils.lock();
-                        System.out.println(Thread.currentThread().getName() + "get lock");
-                        Thread.sleep(2000);
-                    } catch (Exception e) {
-                        //
-                    } finally {
-                        zkUtils.unlock();
-                    }
-                }
-            }).start();
-        }
-    }
 
 }

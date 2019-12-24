@@ -1,4 +1,4 @@
-package com.lipeng.storm.config;
+package com.lipeng.zookeeper.config;
 
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;

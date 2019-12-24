@@ -9,6 +9,7 @@
         <module name="cache" />
         <module name="inventory" />
         <module name="storm" />
+        <module name="zookeeper" />
       </profile>
     </annotationProcessing>
   </component>
@@ -18,6 +19,7 @@
       <module name="eshop" options="-parameters" />
       <module name="inventory" options="-parameters" />
       <module name="storm" options="-parameters" />
+      <module name="zookeeper" options="-parameters" />
     </option>
   </component>
 </project>

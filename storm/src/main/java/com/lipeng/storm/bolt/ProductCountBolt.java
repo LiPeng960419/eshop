@@ -1,8 +1,8 @@
 package com.lipeng.storm.bolt;
 
 import com.alibaba.fastjson.JSONArray;
+import com.lipeng.storm.config.DistributedLockByZookeeper;
 import com.lipeng.storm.config.ZKUtils;
-import com.lipeng.storm.http.HttpClientUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +16,7 @@ import org.apache.storm.trident.util.LRUMap;
 import org.apache.storm.tuple.Tuple;
 import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,6 +30,12 @@ public class ProductCountBolt extends BaseRichBolt {
 
     @Autowired
     private ZKUtils zkUtils;
+
+    @Autowired
+    private DistributedLockByZookeeper lock;
+
+    @Value("${zk.lockPath}")
+    private String lockPath;
 
     private LRUMap<Long, Long> productCountMap = new LRUMap<Long, Long>(1000);
 
@@ -49,7 +56,7 @@ public class ProductCountBolt extends BaseRichBolt {
         // ProductCountBolt所有的task启动的时候， 都会将自己的taskid写到同一个node的值中
         // 格式就是逗号分隔，拼接成一个列表// 111,211,355
         try {
-            zkUtils.lock();
+            lock.acquireDistributedLock(lockPath);
             String taskidList = zkUtils.getNodeData("/taskid-list");
             log.info("【ProductCountBolt获取到taskid list】taskidList=" + taskidList);
             if (!"".equals(taskidList)) {
@@ -62,7 +69,7 @@ public class ProductCountBolt extends BaseRichBolt {
         } catch (Exception e) {
             log.error("initTaskId error", e);
         } finally {
-            zkUtils.unlock();
+            lock.releaseDistributedLock(lockPath);
         }
     }
 
@@ -106,8 +113,7 @@ public class ProductCountBolt extends BaseRichBolt {
                         continue;
                     }
 
-                    log.info("【HotProductFindThread打印productCountMap的长度】size=" + productCountMap
-                            .size());
+                    log.info("【HotProductFindThread打印productCountMap的长度】size=" + productCountMap.size());
 
                     // 1、先做全局的排序
                     for (Map.Entry<Long, Long> productCountEntry : productCountMap.entrySet()) {
@@ -120,15 +126,12 @@ public class ProductCountBolt extends BaseRichBolt {
                             boolean bigger = false;
 
                             for (int i = 0; i < productCountList.size(); i++) {
-                                Map.Entry<Long, Long> topnProductCountEntry = productCountList
-                                        .get(i);
+                                Map.Entry<Long, Long> topnProductCountEntry = productCountList.get(i);
 
                                 if (productCountEntry.getValue() > topnProductCountEntry
                                         .getValue()) {
-                                    int lastIndex =
-                                            productCountList.size() < productCountMap.size() ?
-                                                    productCountList.size() - 1
-                                                    : productCountMap.size() - 2;
+                                    int lastIndex = productCountList.size() < productCountMap.size() ?
+                                                    productCountList.size() - 1 : productCountMap.size() - 2;
                                     for (int j = lastIndex; j >= i; j--) {
                                         if (j + 1 == productCountList.size()) {
                                             productCountList.add(null);
@@ -153,8 +156,7 @@ public class ProductCountBolt extends BaseRichBolt {
                     int calculateCount = (int) Math.floor(productCountList.size() * 0.95);
 
                     Long totalCount = 0L;
-                    for (int i = productCountList.size() - 1;
-                            i >= productCountList.size() - calculateCount; i--) {
+                    for (int i = productCountList.size() - 1; i >= productCountList.size() - calculateCount; i--) {
                         totalCount += productCountList.get(i).getValue();
                     }
 
@@ -165,28 +167,26 @@ public class ProductCountBolt extends BaseRichBolt {
                         if (productCountEntry.getValue() > 10 * avgCount) {
                             hotProductIdList.add(productCountEntry.getKey());
 
-                            // 将缓存热点反向推送到流量分发的nginx中
-                            String distributeNginxURL =
-                                    "http://192.168.31.227/hot?productId=" + productCountEntry
-                                            .getKey();
-                            HttpClientUtils.sendGetRequest(distributeNginxURL);
-
-                            // 将缓存热点，那个商品对应的完整的缓存数据，发送请求到缓存服务去获取，反向推送到所有的后端应用nginx服务器上去
-                            String cacheServiceURL =
-                                    "http://192.168.31.179:8080/getProductInfo?productId="
-                                            + productCountEntry.getKey();
-                            String response = HttpClientUtils.sendGetRequest(cacheServiceURL);
-
-                            String[] appNginxURLs = new String[]{
-                                    "http://192.168.31.187/hot?productId=" + productCountEntry
-                                            .getKey() + "&productInfo=" + response,
-                                    "http://192.168.31.19/hot?productId=" + productCountEntry
-                                            .getKey() + "&productInfo=" + response
-                            };
-
-                            for (String appNginxURL : appNginxURLs) {
-                                HttpClientUtils.sendGetRequest(appNginxURL);
-                            }
+//                            // 将缓存热点反向推送到流量分发的nginx中
+//                            String distributeNginxURL = "http://192.168.31.227/hot?productId=" + productCountEntry.getKey();
+//                            HttpClientUtils.sendGetRequest(distributeNginxURL);
+//
+//                            // 将缓存热点，那个商品对应的完整的缓存数据，发送请求到缓存服务去获取，反向推送到所有的后端应用nginx服务器上去
+//                            String cacheServiceURL =
+//                                    "http://192.168.31.179:8080/getProductInfo?productId="
+//                                            + productCountEntry.getKey();
+//                            String response = HttpClientUtils.sendGetRequest(cacheServiceURL);
+//
+//                            String[] appNginxURLs = new String[]{
+//                                    "http://192.168.31.187/hot?productId=" + productCountEntry
+//                                            .getKey() + "&productInfo=" + response,
+//                                    "http://192.168.31.19/hot?productId=" + productCountEntry
+//                                            .getKey() + "&productInfo=" + response
+//                            };
+//
+//                            for (String appNginxURL : appNginxURLs) {
+//                                HttpClientUtils.sendGetRequest(appNginxURL);
+//                            }
                         }
                     }
 
@@ -217,8 +217,7 @@ public class ProductCountBolt extends BaseRichBolt {
                         continue;
                     }
 
-                    log.info("【ProductCountThread打印productCountMap的长度】size=" + productCountMap
-                            .size());
+                    log.info("【ProductCountThread打印productCountMap的长度】size=" + productCountMap.size());
 
                     for (Map.Entry<Long, Long> productCountEntry : productCountMap.entrySet()) {
                         if (topnProductList.size() == 0) {
@@ -226,13 +225,10 @@ public class ProductCountBolt extends BaseRichBolt {
                         } else {
                             boolean bigger = false;
                             for (int i = 0; i < topnProductList.size(); i++) {
-                                Map.Entry<Long, Long> topnProductCountEntry = topnProductList
-                                        .get(i);
+                                Map.Entry<Long, Long> topnProductCountEntry = topnProductList.get(i);
                                 if (productCountEntry.getValue() > topnProductCountEntry
                                         .getValue()) {
-                                    int lastIndex =
-                                            topnProductList.size() < topn ? topnProductList.size()
-                                                    - 1 : topn - 2;
+                                    int lastIndex = topnProductList.size() < topn ? topnProductList.size() - 1 : topn - 2;
                                     for (int j = lastIndex; j >= i; j--) {
                                         if (j + 1 == topnProductList.size()) {
                                             topnProductList.add(null);
