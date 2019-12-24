@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>eshop</artifactId>
+        <groupId>com.lipeng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>zookeeper</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>zookeeper</name>
+    <description>zookeeper</description>
+
+    <!--linux 3.4.x的zk 只能用到2.11.1版本 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>2.11.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>2.11.1</version>
+        </dependency>
+    </dependencies>
+
+</project>
