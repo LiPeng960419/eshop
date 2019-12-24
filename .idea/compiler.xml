@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="cache" />
         <module name="inventory" />
+        <module name="storm" />
       </profile>
     </annotationProcessing>
   </component>
@@ -16,6 +17,7 @@
       <module name="cache" options="-parameters" />
       <module name="eshop" options="-parameters" />
       <module name="inventory" options="-parameters" />
+      <module name="storm" options="-parameters" />
     </option>
   </component>
 </project>
