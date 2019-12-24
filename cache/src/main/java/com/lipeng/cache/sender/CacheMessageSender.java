@@ -1,6 +1,8 @@
 package com.lipeng.cache.sender;
 
 import com.alibaba.fastjson.JSON;
+import com.lipeng.cache.model.ProductInfoChangeMsg;
+import com.lipeng.cache.model.ShopInfoChangeMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,10 +29,11 @@ public class CacheMessageSender<T> {
 
     @Async
     public void sendCacheChangeMsg(T data) {
+        String key = getKeyByData(data);
         String msg = JSON.toJSONString(data);
-        log.info("CacheMessageSender send msg:" + msg);
+        log.info("CacheMessageSender key:{},msg:{}", key, msg);
 
-        ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(topic, msg);
+        ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(topic, key, msg);
 
         future.addCallback(new ListenableFutureCallback<SendResult<String, Object>>() {
             @Override
@@ -43,6 +46,16 @@ public class CacheMessageSender<T> {
                 log.info("CacheMessageSender send msg:{} success,result:{}", msg, result);
             }
         });
+    }
+
+    private String getKeyByData(T data) {
+        if (data instanceof ProductInfoChangeMsg) {
+            return String.valueOf(((ProductInfoChangeMsg) data).getProductId());
+        } else if (data instanceof ShopInfoChangeMsg) {
+            return String.valueOf(((ShopInfoChangeMsg) data).getShopId());
+        } else {
+            throw new NullPointerException("key is empty");
+        }
     }
 
 }

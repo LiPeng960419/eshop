@@ -70,6 +70,7 @@ public class KafkaConfig {
         props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, bufferMemory);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, CustomPartitioner.class);
         return props;
     }
 
