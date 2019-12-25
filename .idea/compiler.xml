@@ -18,7 +18,7 @@
       <module name="cache" options="-parameters" />
       <module name="eshop" options="-parameters" />
       <module name="inventory" options="-parameters" />
-      <module name="storm" options="" />
+      <module name="storm" options="-parameters" />
       <module name="zookeeper" options="-parameters" />
     </option>
   </component>
