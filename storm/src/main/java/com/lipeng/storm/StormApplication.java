@@ -9,6 +9,7 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
@@ -16,9 +17,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class StormApplication {
 
+    private static ConfigurableApplicationContext context = null;
+
     public static void main(String[] args) {
-        SpringApplication.run(StormApplication.class, args);
         runStorm(args);
+    }
+
+    public static synchronized void run(String... args) {
+        if (context == null) {
+            context = SpringApplication.run(StormApplication.class, args);
+        }
     }
 
     public static void runStorm(String[] args) {

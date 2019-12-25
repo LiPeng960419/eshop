@@ -1,5 +1,6 @@
 package com.lipeng.storm.bolt;
 
+import com.lipeng.storm.StormApplication;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.storm.task.OutputCollector;
@@ -19,7 +20,14 @@ public class TestBolt extends BaseRichBolt {
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-        log.info(map + "," + topologyContext + "," + outputCollector);
+        String osName = System.getProperty("os.name");
+        if (!(osName.toLowerCase().contains("windows")
+                || osName.toLowerCase().contains("win"))) {
+            StormApplication.run();
+            log.info("TestBolt linux下启动成功");
+        } else {
+            log.info("TestBolt windows下启动成功");
+        }
     }
 
     @Override
