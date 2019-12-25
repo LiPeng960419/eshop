@@ -20,14 +20,7 @@ public class TestBolt extends BaseRichBolt {
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-        String osName = System.getProperty("os.name");
-        if (!(osName.toLowerCase().contains("windows")
-                || osName.toLowerCase().contains("win"))) {
-            StormApplication.run();
-            log.info("TestBolt linux下启动成功");
-        } else {
-            log.info("TestBolt windows下启动成功");
-        }
+        StormApplication.run();
     }
 
     @Override

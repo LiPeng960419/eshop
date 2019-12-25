@@ -44,20 +44,21 @@ public class StormApplication {
 
         Config config = new Config();
         try {
-            if (args != null && args.length > 0) {
+            String osName = System.getProperty("os.name");
+            if (osName.toLowerCase().contains("windows")
+                    || osName.toLowerCase().contains("win")) {
+                LocalCluster cluster = new LocalCluster();
+                cluster.submitTopology("StormTopology", config, builder.createTopology());
+                log.info("运行本地模式");
+            } else {
                 config.setNumWorkers(3);
                 try {
-                    StormSubmitter.submitTopology(args[0], config, builder.createTopology());
+                    StormSubmitter.submitTopology("StormTopology", config, builder.createTopology());
                     log.info("运行远程模式");
                 } catch (Exception e) {
                     log.error("storm运行远程模式启动失败!", e);
                 }
-            } else {
-                LocalCluster cluster = new LocalCluster();
-                cluster.submitTopology("HotProductTopology", config, builder.createTopology());
-                log.info("运行本地模式");
             }
-            log.info("storm启动成功...");
         } catch (Exception e) {
             log.error("storm启动失败!", e);
         }
