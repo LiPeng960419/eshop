@@ -1,6 +1,5 @@
 package com.lipeng.storm.utils;
 
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -16,17 +15,21 @@ public class GetSpringBean implements ApplicationContextAware {
         return context.getBean(name);
     }
 
-    public static <T> T getBean(Class<T> c) {
-
-        return context.getBean(c);
+    public static ApplicationContext getApplicationContext() {
+        return context;
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext)
-            throws BeansException {
-        if (applicationContext != null) {
-            context = applicationContext;
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        synchronized (this) {
+            if (GetSpringBean.context == null) {
+                GetSpringBean.context = applicationContext;
+            }
         }
+    }
+
+    public static <T> T getBean(Class<T> c) {
+        return context.getBean(c);
     }
 
 }

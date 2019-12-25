@@ -1,6 +1,6 @@
 package com.lipeng.storm.spout;
 
-import com.lipeng.storm.StormApplication;
+import com.lipeng.storm.StormApplicationServer;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.storm.spout.SpoutOutputCollector;
@@ -12,7 +12,6 @@ import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
 
 /**
  * kafka消费数据的spout
@@ -30,7 +29,11 @@ public class AccessLogKafkaSpout extends BaseRichSpout {
     public void open(Map conf, TopologyContext context,
             SpoutOutputCollector collector) {
         this.collector = collector;
-        StormApplication.run();
+        String osName = System.getProperty("os.name");
+        if (!(osName.toLowerCase().contains("windows")
+                || osName.toLowerCase().contains("win"))) {
+            StormApplicationServer.run();
+        }
     }
 
     public void nextTuple() {

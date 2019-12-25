@@ -2,6 +2,8 @@ package com.lipeng.storm;
 
 import com.lipeng.storm.bolt.TestBolt;
 import com.lipeng.storm.spout.AccessLogKafkaSpout;
+import com.lipeng.storm.utils.GetSpringBean;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
@@ -9,7 +11,6 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
@@ -17,19 +18,30 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class StormApplication {
 
-    private static ConfigurableApplicationContext context = null;
-
+    /*
+    本地运行
+     */
     public static void main(String[] args) {
-        runStorm(args);
+        StormApplication.runSpring();
+        StormApplication.runStorm();
     }
 
-    public static synchronized void run(String... args) {
-        if (context == null) {
-            context = SpringApplication.run(StormApplication.class, args);
+    public synchronized static void runSpring() {
+        runSpring(new String[0]);
+    }
+
+    public synchronized static void runSpring(String... args) {
+        if (Objects.nonNull(GetSpringBean.getApplicationContext())) {
+            return;
         }
+        run(args);
     }
 
-    public static void runStorm(String[] args) {
+    public synchronized static void run(String[] args) {
+        SpringApplication.run(StormApplication.class, args);
+    }
+
+    public synchronized static void runStorm() {
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("AccessLogKafkaSpout", new AccessLogKafkaSpout(), 1);
         builder.setBolt("TestBolt", new TestBolt(), 2)
