@@ -3,6 +3,7 @@ package com.lipeng.storm.bolt;
 import com.alibaba.fastjson.JSONArray;
 import com.lipeng.storm.config.DistributedLockByZookeeper;
 import com.lipeng.storm.config.ZKUtils;
+import com.lipeng.storm.utils.GetSpringBean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,33 +16,28 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.trident.util.LRUMap;
 import org.apache.storm.tuple.Tuple;
 import org.apache.zookeeper.CreateMode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * 商品访问次数统计bolt
  */
 @Slf4j
-@Component
 public class ProductCountBolt extends BaseRichBolt {
 
     private static final long serialVersionUID = -8761807561458126413L;
 
-    @Autowired
     private ZKUtils zkUtils;
 
-    @Autowired
     private DistributedLockByZookeeper lock;
 
-    @Value("${zk.lockPath}")
-    private String lockPath;
+    private static final String lockPath = "productId_lock_path";
 
     private LRUMap<Long, Long> productCountMap = new LRUMap<Long, Long>(1000);
 
     private int taskid;
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+        zkUtils = GetSpringBean.getBean(ZKUtils.class);
+        lock = GetSpringBean.getBean(DistributedLockByZookeeper.class);
         this.taskid = context.getThisTaskId();
         new Thread(new ProductCountThread()).start();
         new Thread(new HotProductFindThread()).start();

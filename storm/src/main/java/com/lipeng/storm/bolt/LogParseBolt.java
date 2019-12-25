@@ -10,12 +10,10 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.springframework.stereotype.Component;
 
 /**
  * 日志解析的bolt
  */
-@Component
 @Slf4j
 public class LogParseBolt extends BaseRichBolt {
 
