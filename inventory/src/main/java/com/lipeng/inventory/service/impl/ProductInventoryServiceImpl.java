@@ -42,6 +42,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
      * @param productId 商品id
      * @return 商品库存
      */
+    @Override
     public ProductInventory findProductInventory(Integer productId) {
         return productInventoryMapper.findProductInventory(productId);
     }
@@ -51,6 +52,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
      *
      * @param productInventory 商品库存
      */
+    @Override
     public void setProductInventoryCache(ProductInventory productInventory) {
         String key = "product:inventory:" + productInventory.getProductId();
         redisUtil.setString(key, String.valueOf(productInventory.getInventoryCnt()));
@@ -61,6 +63,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     /**
      * 获取商品库存的缓存
      */
+    @Override
     public ProductInventory getProductInventoryCache(Integer productId) {
         Long inventoryCnt = 0L;
         String key = "product:inventory:" + productId;
